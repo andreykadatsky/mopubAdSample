@@ -44,7 +44,7 @@ android {
     defaultConfig {
         versionCode 30
         versionName version
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 22
         consumerProguardFiles 'proguard.txt'
     }

@@ -6,9 +6,12 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.loopme.LoopMeAdapter;
+import com.mopub.nativeads.LoopMeEventNative;
 import com.mopub.nativeads.MoPubAdAdapter;
 import com.mopub.nativeads.MoPubNativeAdRenderer;
 import com.mopub.nativeads.RequestParameters;
@@ -18,10 +21,14 @@ import java.util.EnumSet;
 
 import static com.mopub.nativeads.RequestParameters.NativeAdAsset;
 
-public class NativeListViewFragment extends Fragment {
+public class NativeListViewFragment extends Fragment implements LoopMeAdapter {
+
+    private static final String ADUNIT_ID = "6759b3e7fcc14a7fa80a1c346842381a";
+
     private MoPubAdAdapter mAdAdapter;
     private MoPubSampleAdUnit mAdConfiguration;
     private RequestParameters mRequestParameters;
+    private ListView mListView;
 
     @Override
     public View onCreateView(final LayoutInflater inflater,
@@ -29,9 +36,14 @@ public class NativeListViewFragment extends Fragment {
             final Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        mAdConfiguration = MoPubSampleAdUnit.fromBundle(getArguments());
+        // mAdConfiguration = MoPubSampleAdUnit.fromBundle(getArguments());
+
+        mAdConfiguration = new MoPubSampleAdUnit.Builder(ADUNIT_ID, MoPubSampleAdUnit.AdType.LIST_VIEW)
+                .description("Loopme ridge sample")
+                .build();
+
         final View view = inflater.inflate(R.layout.native_list_view_fragment, container, false);
-        final ListView listView = (ListView) view.findViewById(R.id.native_list_view);
+        mListView = (ListView) view.findViewById(R.id.native_list_view);
         final DetailFragmentViewHolder views = DetailFragmentViewHolder.fromView(view);
         views.mLoadButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -85,8 +97,22 @@ public class NativeListViewFragment extends Fragment {
 
         // Register the renderer with the MoPubAdAdapter and then set the adapter on the ListView.
         mAdAdapter.registerAdRenderer(adRenderer);
-        listView.setAdapter(mAdAdapter);
+        mListView.setAdapter(mAdAdapter);
+        mListView.setOnScrollListener(createScrollListener());
         return view;
+    }
+
+    private ListView.OnScrollListener createScrollListener() {
+        return new ListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                LoopMeEventNative.onScroll(NativeListViewFragment.this, mListView);
+            }
+        };
     }
 
     @Override
@@ -97,9 +123,22 @@ public class NativeListViewFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        LoopMeEventNative.onPause();
+
+    }
+
+    @Override
     public void onResume() {
         // MoPub recommends loading knew ads when the user returns to your activity.
         mAdAdapter.loadAds(mAdConfiguration.getAdUnitId(), mRequestParameters);
+        LoopMeEventNative.onResume(NativeListViewFragment.this, mListView);
         super.onResume();
+    }
+
+    @Override
+    public boolean isAd(int i) {
+        return mAdAdapter.isAd(i);
     }
 }

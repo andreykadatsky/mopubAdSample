@@ -18,7 +18,7 @@ android {
     defaultConfig {
         versionCode 30
         versionName version
-        minSdkVersion 9
+        minSdkVersion 14
         targetSdkVersion 22
     }
 
@@ -55,7 +55,9 @@ android {
 
 dependencies {
     compile 'com.android.support:support-v4:22.0.0'
+    compile 'com.android.support:support-v4:22.0.0'
     compile 'com.google.android.gms:play-services-ads:7.0.0'
     compile 'com.android.support:recyclerview-v7:22.0.0'
     compile project(':mopub-sdk')
+    compile project(':loopme-sdk')
 }

@@ -3,7 +3,7 @@
       package="com.mopub.simpleadsdemo"
       android:versionCode="30"
       android:versionName="3.13.0">
-    <uses-sdk android:minSdkVersion="9"
+    <uses-sdk android:minSdkVersion="14"
               android:targetSdkVersion="22"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -31,6 +31,15 @@
                 android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name="com.mopub.mobileads.MraidVideoPlayerActivity"
                 android:configChanges="keyboardHidden|orientation|screenSize"/>
+
+        <!--  LoopMe activity start -->
+        <activity android:name="com.loopme.AdActivity"
+                  android:theme="@android:style/Theme.Translucent"
+                  android:configChanges="orientation|keyboardHidden|screenSize"
+                  android:hardwareAccelerated="false"/>
+
+        <activity android:name="com.loopme.AdBrowserActivity"/>
+        <!--  LoopMe activity end -->
 
         <meta-data android:name="com.google.android.gms.version"
                    android:value="@integer/google_play_services_version" />
