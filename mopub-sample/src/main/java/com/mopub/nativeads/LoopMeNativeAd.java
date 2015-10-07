@@ -79,6 +79,11 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
     @Override
     public void prepare(View view) {
         Log.d("debug2", "prepare");
+
+        if (view instanceof LinearLayout) {
+            return;
+        }
+
         if (view != null && view instanceof ViewGroup) {
 
             ViewGroup viewGroup = (ViewGroup) view;
@@ -103,10 +108,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 } else if (view instanceof RelativeLayout) {
                     RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBannerView.getLayoutParams();
                     params.addRule(RelativeLayout.CENTER_IN_PARENT);
-                    mBannerView.setLayoutParams(params);
-                } else if (view instanceof LinearLayout) {
-                    LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mBannerView.getLayoutParams();
-                    params.gravity = Gravity.CENTER;
                     mBannerView.setLayoutParams(params);
                 }
                 mBanner.bindView(mBannerView);
