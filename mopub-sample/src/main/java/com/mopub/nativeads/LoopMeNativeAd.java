@@ -1,7 +1,6 @@
 package com.mopub.nativeads;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +20,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
     static final String TITLE = "LoopmeBanner";
 
     private LoopMeBannerView mBannerView;
+    private FrameLayout mBannerViewHolder;
     private LoopMeBanner mBanner;
     private boolean mLoadFailed;
 
@@ -29,21 +29,31 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
     private LoopMeEventNative.OnCompleteListener mListener;
 
-    public LoopMeNativeAd(Context context, String appKey, LoopMeEventNative.OnCompleteListener listener) {
+    private final int bannerBgColor;
+
+    public LoopMeNativeAd(Context context, String appKey, int bannerBgColor, LoopMeEventNative.OnCompleteListener listener) {
+        this.bannerBgColor = bannerBgColor;
         setTitle(TITLE);
         mBanner = LoopMeBanner.getInstance(appKey, context);
         mBanner.setAdVisibilityListener(new LoopMeBanner.AdVisibilityListener() {
             @Override
             public void displayed() {
-                Log.d("debug2", "displayed");
+                if (mBannerViewHolder.getParent() != null) {
+                    ViewGroup parent = (ViewGroup) mBannerViewHolder.getParent();
+                    ViewGroup.LayoutParams params = mBannerViewHolder.getLayoutParams();
+                    params.width = parent.getWidth();
+                    params.height = parent.getHeight();
+                    mBannerViewHolder.setLayoutParams(params);
+                }
 
                 if (itemViewClean) {
-                    if (mBannerView.getParent() == null) {
-                        Log.d("debug2", "rebuildView");
+                    if (mBannerViewHolder.getParent() == null) {
                         mBanner.bindView(mBannerView);
                         mBanner.show(null, null);
                         mBanner.rebuildView(mBannerView);
-                        currentItem.addView(mBannerView);
+
+                        currentItem.addView(mBannerViewHolder);
+
                         itemViewClean = false;
                     }
                 }
@@ -52,13 +62,11 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
             @Override
             public void hidden() {
-                Log.d("debug2", "hidden");
                 if (!itemViewClean) {
-                    if (mBannerView != null && mBannerView.getParent() != null) {
-                        ViewGroup listItem = (ViewGroup) mBannerView.getParent();
-                        listItem.removeView(mBannerView);
+                    if (mBannerView != null && mBannerViewHolder.getParent() != null) {
+                        ViewGroup listItem = (ViewGroup) mBannerViewHolder.getParent();
+                        listItem.removeView(mBannerViewHolder);
                         itemViewClean = true;
-                        Log.d("debug2", "restore View state");
                     }
                 }
 
@@ -68,17 +76,14 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
         mListener = listener;
         if (mBanner != null) {
             if (!mBanner.isReady() && !mBanner.isLoading() && !mLoadFailed) {
-                Log.d("debug2", "load()");
                 mBanner.setListener(this);
                 mBanner.load();
             }
         }
-        Log.d("debug2", "LoopMeNativeAd item created");
     }
 
     @Override
     public void prepare(View view) {
-        Log.d("debug2", "prepare");
 
         if (view instanceof LinearLayout) {
             return;
@@ -93,7 +98,18 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
             if (mBannerView == null) {
 
                 mBannerView = new LoopMeBannerView(view.getContext());
-                viewGroup.addView(mBannerView);
+
+                mBannerViewHolder = new FrameLayout(view.getContext());
+                mBannerViewHolder.setBackgroundColor(bannerBgColor);
+                mBannerViewHolder.addView(mBannerView);
+
+                FrameLayout.LayoutParams frameParams = (FrameLayout.LayoutParams) mBannerView.getLayoutParams();
+                frameParams.gravity = Gravity.CENTER;
+
+                viewGroup.addView(mBannerViewHolder);
+
+                mBannerViewHolder.bringToFront();
+                viewGroup.invalidate();
                 itemViewClean = false;
 
                 int w = Utils.convertDpToPixel(320);
@@ -102,13 +118,13 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 mBannerView.setViewSize(w, h);
 
                 if (view instanceof FrameLayout) {
-                    FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mBannerView.getLayoutParams();
+                    FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mBannerViewHolder.getLayoutParams();
                     params.gravity = Gravity.CENTER;
-                    mBannerView.setLayoutParams(params);
+                    mBannerViewHolder.setLayoutParams(params);
                 } else if (view instanceof RelativeLayout) {
-                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBannerView.getLayoutParams();
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) mBannerViewHolder.getLayoutParams();
                     params.addRule(RelativeLayout.CENTER_IN_PARENT);
-                    mBannerView.setLayoutParams(params);
+                    mBannerViewHolder.setLayoutParams(params);
                 }
                 mBanner.bindView(mBannerView);
                 mBanner.show(null, null);
@@ -118,7 +134,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
     @Override
     public void destroy() {
-        Log.d("debug2", "destroy");
         if (mBanner != null) {
             mBanner.dismiss();
             mBanner.destroy();
@@ -146,13 +161,11 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
     @Override
     public void onLoopMeBannerLoadSuccess(LoopMeBanner loopMeBanner) {
-        Log.d("debug2", "onLoopMeBannerLoadSuccess");
         mListener.loaded();
     }
 
     @Override
     public void onLoopMeBannerLoadFail(LoopMeBanner banner, LoopMeError error) {
-        Log.d("debug2", "onLoopMeBannerLoadFail");
         mLoadFailed = true;
         mListener.failed();
     }

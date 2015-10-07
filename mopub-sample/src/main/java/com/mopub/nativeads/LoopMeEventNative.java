@@ -1,6 +1,7 @@
 package com.mopub.nativeads;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.ListView;
@@ -19,6 +20,7 @@ public class LoopMeEventNative extends CustomEventNative {
     private static LoopMeNativeAd sLoopMeNativeAd;
     private static LoopMeAdapter mLoopMeAdapter;
     private static ListView mListView;
+    private static int mBannerBgColor = Color.WHITE;
 
     static class OnCompleteListener {
 
@@ -57,13 +59,16 @@ public class LoopMeEventNative extends CustomEventNative {
                 if (mListView.getAdapter().getItem(i) instanceof NativeAdData) {
                     NativeAdData adData = (NativeAdData) mListView.getAdapter().getItem(i);
                     if (adData.getAd().getTitle().equals(LoopMeNativeAd.TITLE)) {
-                        Log.d("debug2", "Loopme banner on screen");
                         return true;
                     }
                 }
                 return false;
             }
         };
+    }
+
+    public static void setBannerBackgroundColor(int color) {
+        LoopMeEventNative.mBannerBgColor = color;
     }
 
     public static void onScroll() {
@@ -93,7 +98,7 @@ public class LoopMeEventNative extends CustomEventNative {
             String appKey = serverExtras.get(APP_KEY);
             Log.d(TAG, "loadNativeAd, appKey = " + appKey);
             OnCompleteListener listener = new OnCompleteListener(customEventNativeListener);
-            sLoopMeNativeAd = new LoopMeNativeAd(context, appKey, listener);
+            sLoopMeNativeAd = new LoopMeNativeAd(context, appKey, mBannerBgColor, listener);
         } else {
             // ad already present, we can have only one at once
             customEventNativeListener.onNativeAdFailed(NativeErrorCode.UNSPECIFIED);

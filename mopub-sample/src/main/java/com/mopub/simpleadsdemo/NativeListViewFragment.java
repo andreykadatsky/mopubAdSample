@@ -1,5 +1,6 @@
 package com.mopub.simpleadsdemo;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -100,6 +101,7 @@ public class NativeListViewFragment extends Fragment {
         mListView.setOnScrollListener(createScrollListener());
 
         LoopMeEventNative.init(mListView);
+        LoopMeEventNative.setBannerBackgroundColor(Color.parseColor("#303030"));
 
         return view;
     }
