@@ -38,7 +38,7 @@ public class NativeListViewFragment extends Fragment {
         // mAdConfiguration = MoPubSampleAdUnit.fromBundle(getArguments());
 
         mAdConfiguration = new MoPubSampleAdUnit.Builder(ADUNIT_ID, MoPubSampleAdUnit.AdType.LIST_VIEW)
-                .description("Loopme ridge sample")
+                .description("Loopme bridge sample")
                 .build();
 
         final View view = inflater.inflate(R.layout.native_list_view_fragment, container, false);

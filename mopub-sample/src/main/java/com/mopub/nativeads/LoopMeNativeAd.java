@@ -20,9 +20,9 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
     static final String TITLE = "LoopmeBanner";
 
-    private static LoopMeBannerView mBannerView;
-    private static LoopMeBanner mBanner;
-    private static boolean mLoadFailed;
+    private LoopMeBannerView mBannerView;
+    private LoopMeBanner mBanner;
+    private boolean mLoadFailed;
 
     private boolean itemViewClean = true;
     private ViewGroup currentItem;
@@ -43,7 +43,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                         mBanner.bindView(mBannerView);
                         mBanner.show(null, null);
                         mBanner.rebuildView(mBannerView);
-                        //changeChildrenVisibility(currentItem, View.INVISIBLE);
                         currentItem.addView(mBannerView);
                         itemViewClean = false;
                     }
@@ -58,7 +57,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                     if (mBannerView != null && mBannerView.getParent() != null) {
                         ViewGroup listItem = (ViewGroup) mBannerView.getParent();
                         listItem.removeView(mBannerView);
-                        changeChildrenVisibility(listItem, View.VISIBLE);
                         itemViewClean = true;
                         Log.d("debug2", "restore View state");
                     }
@@ -84,7 +82,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
         if (view != null && view instanceof ViewGroup) {
 
             ViewGroup viewGroup = (ViewGroup) view;
-            //changeChildrenVisibility(viewGroup, View.INVISIBLE);
 
             currentItem = viewGroup;
 
@@ -97,7 +94,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 int w = Utils.convertDpToPixel(320);
                 int h = Utils.convertDpToPixel(250);
 
-                //mBannerView.setViewSize(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 mBannerView.setViewSize(w, h);
 
                 if (view instanceof FrameLayout) {
@@ -115,26 +111,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 }
                 mBanner.bindView(mBannerView);
                 mBanner.show(null, null);
-            } else {
-                if (mBannerView.getParent() == null) {
-                    Log.d("debug2", "rebuildView");
-                    mBanner.bindView(mBannerView);
-                    mBanner.show(null, null);
-                    mBanner.rebuildView(mBannerView);
-                    viewGroup.addView(mBannerView);
-                    itemViewClean = false;
-                }
             }
-        }
-    }
-
-    private void changeChildrenVisibility(ViewGroup viewGroup, int visibility) {
-        for (int i = 0; i < viewGroup.getChildCount(); i++) {
-            View view = viewGroup.getChildAt(i);
-            if (view instanceof LoopMeBannerView) {
-                continue;
-            }
-            view.setVisibility(visibility);
         }
     }
 
