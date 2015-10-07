@@ -18,14 +18,55 @@ import com.loopme.Utils;
 
 public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBanner.Listener {
 
+    static final String TITLE = "LoopmeBanner";
+
     private static LoopMeBannerView mBannerView;
     private static LoopMeBanner mBanner;
     private static boolean mLoadFailed;
 
+    private boolean itemViewClean = true;
+    private ViewGroup currentItem;
+
     private LoopMeEventNative.OnCompleteListener mListener;
 
     public LoopMeNativeAd(Context context, String appKey, LoopMeEventNative.OnCompleteListener listener) {
+        setTitle(TITLE);
         mBanner = LoopMeBanner.getInstance(appKey, context);
+        mBanner.setAdVisibilityListener(new LoopMeBanner.AdVisibilityListener() {
+            @Override
+            public void displayed() {
+                Log.d("debug2", "displayed");
+
+                if (itemViewClean) {
+                    if (mBannerView.getParent() == null) {
+                        Log.d("debug2", "rebuildView");
+                        mBanner.bindView(mBannerView);
+                        mBanner.show(null, null);
+                        mBanner.rebuildView(mBannerView);
+                        //changeChildrenVisibility(currentItem, View.INVISIBLE);
+                        currentItem.addView(mBannerView);
+                        itemViewClean = false;
+                    }
+                }
+
+            }
+
+            @Override
+            public void hidden() {
+                Log.d("debug2", "hidden");
+                if (!itemViewClean) {
+                    if (mBannerView != null && mBannerView.getParent() != null) {
+                        ViewGroup listItem = (ViewGroup) mBannerView.getParent();
+                        listItem.removeView(mBannerView);
+                        changeChildrenVisibility(listItem, View.VISIBLE);
+                        itemViewClean = true;
+                        Log.d("debug2", "restore View state");
+                    }
+                }
+
+            }
+        });
+
         mListener = listener;
         if (mBanner != null) {
             if (!mBanner.isReady() && !mBanner.isLoading() && !mLoadFailed) {
@@ -43,12 +84,15 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
         if (view != null && view instanceof ViewGroup) {
 
             ViewGroup viewGroup = (ViewGroup) view;
-            changeChildrenVisibility(viewGroup, View.GONE);
+            //changeChildrenVisibility(viewGroup, View.INVISIBLE);
+
+            currentItem = viewGroup;
 
             if (mBannerView == null) {
 
                 mBannerView = new LoopMeBannerView(view.getContext());
                 viewGroup.addView(mBannerView);
+                itemViewClean = false;
 
                 int w = Utils.convertDpToPixel(320);
                 int h = Utils.convertDpToPixel(250);
@@ -71,6 +115,15 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 }
                 mBanner.bindView(mBannerView);
                 mBanner.show(null, null);
+            } else {
+                if (mBannerView.getParent() == null) {
+                    Log.d("debug2", "rebuildView");
+                    mBanner.bindView(mBannerView);
+                    mBanner.show(null, null);
+                    mBanner.rebuildView(mBannerView);
+                    viewGroup.addView(mBannerView);
+                    itemViewClean = false;
+                }
             }
         }
     }

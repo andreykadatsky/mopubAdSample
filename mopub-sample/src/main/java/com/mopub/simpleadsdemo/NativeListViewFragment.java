@@ -10,7 +10,6 @@ import android.widget.AbsListView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import com.loopme.LoopMeAdapter;
 import com.mopub.nativeads.LoopMeEventNative;
 import com.mopub.nativeads.MoPubAdAdapter;
 import com.mopub.nativeads.MoPubNativeAdRenderer;
@@ -21,7 +20,7 @@ import java.util.EnumSet;
 
 import static com.mopub.nativeads.RequestParameters.NativeAdAsset;
 
-public class NativeListViewFragment extends Fragment implements LoopMeAdapter {
+public class NativeListViewFragment extends Fragment {
 
     private static final String ADUNIT_ID = "6759b3e7fcc14a7fa80a1c346842381a";
 
@@ -99,6 +98,9 @@ public class NativeListViewFragment extends Fragment implements LoopMeAdapter {
         mAdAdapter.registerAdRenderer(adRenderer);
         mListView.setAdapter(mAdAdapter);
         mListView.setOnScrollListener(createScrollListener());
+
+        LoopMeEventNative.init(mListView);
+
         return view;
     }
 
@@ -110,7 +112,7 @@ public class NativeListViewFragment extends Fragment implements LoopMeAdapter {
 
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                LoopMeEventNative.onScroll(NativeListViewFragment.this, mListView);
+                LoopMeEventNative.onScroll();
             }
         };
     }
@@ -133,12 +135,8 @@ public class NativeListViewFragment extends Fragment implements LoopMeAdapter {
     public void onResume() {
         // MoPub recommends loading knew ads when the user returns to your activity.
         mAdAdapter.loadAds(mAdConfiguration.getAdUnitId(), mRequestParameters);
-        LoopMeEventNative.onResume(NativeListViewFragment.this, mListView);
+        LoopMeEventNative.onResume();
         super.onResume();
     }
 
-    @Override
-    public boolean isAd(int i) {
-        return mAdAdapter.isAd(i);
-    }
 }

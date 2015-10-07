@@ -15,8 +15,10 @@ public class LoopMeEventNative extends CustomEventNative {
 
     private static final String APP_KEY = "app_key";
 
-    private static LoopMeNativeAd sLoopMeNativeAd;
     private static boolean nativeAdAddedToAdapter = false;
+    private static LoopMeNativeAd sLoopMeNativeAd;
+    private static LoopMeAdapter mLoopMeAdapter;
+    private static ListView mListView;
 
     static class OnCompleteListener {
 
@@ -44,9 +46,29 @@ public class LoopMeEventNative extends CustomEventNative {
 
     }
 
-    public static void onScroll(LoopMeAdapter adapter, ListView listView) {
+    public static void init(ListView listView) {
+        mListView = listView;
+        mLoopMeAdapter = new LoopMeAdapter() {
+            @Override
+            public boolean isAd(int i) {
+                if (sLoopMeNativeAd == null) {
+                    return false;
+                }
+                if (mListView.getAdapter().getItem(i) instanceof NativeAdData) {
+                    NativeAdData adData = (NativeAdData) mListView.getAdapter().getItem(i);
+                    if (adData.getAd().getTitle().equals(LoopMeNativeAd.TITLE)) {
+                        Log.d("debug2", "Loopme banner on screen");
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
+    public static void onScroll() {
         if (sLoopMeNativeAd != null) {
-            sLoopMeNativeAd.onScroll(adapter, listView);
+            sLoopMeNativeAd.onScroll(mLoopMeAdapter, mListView);
         }
     }
 
@@ -56,9 +78,9 @@ public class LoopMeEventNative extends CustomEventNative {
         }
     }
 
-    public static void onResume(LoopMeAdapter adapter, ListView listView) {
+    public static void onResume() {
         if (sLoopMeNativeAd != null) {
-            sLoopMeNativeAd.onResume(adapter, listView);
+            sLoopMeNativeAd.onResume(mLoopMeAdapter, mListView);
         }
     }
 

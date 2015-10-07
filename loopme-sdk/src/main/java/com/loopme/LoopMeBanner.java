@@ -10,6 +10,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ListView;
@@ -44,6 +45,15 @@ public class LoopMeBanner extends BaseAd {
 
     private boolean mIsVideoFinished;
 
+    private AdVisibilityListener mAdVisibilityListener;
+
+    public interface AdVisibilityListener {
+
+        void displayed();
+
+        void hidden();
+
+    }
     public interface Listener {
 
         void onLoopMeBannerLoadSuccess(LoopMeBanner banner);
@@ -61,8 +71,8 @@ public class LoopMeBanner extends BaseAd {
         void onLoopMeBannerVideoDidReachEnd(LoopMeBanner banner);
 
         void onLoopMeBannerExpired(LoopMeBanner banner);
-    }
 
+    }
     /**
      * Creates new `LoopMeBanner` object with the given appKey
      *
@@ -252,8 +262,16 @@ public class LoopMeBanner extends BaseAd {
                 isAmongVisibleElements = true;
             }
         }
-        if (!isAmongVisibleElements) {
+        if (isAmongVisibleElements) {
+            if (mAdVisibilityListener != null) {
+                mAdVisibilityListener.displayed();
+            }
+
+        } else {
             switchToMinimizedMode();
+            if (mAdVisibilityListener != null) {
+                mAdVisibilityListener.hidden();
+            }
         }
     }
 
@@ -336,6 +354,7 @@ public class LoopMeBanner extends BaseAd {
      * @param view    - listview/recyclerview/scrollview in which native video ad is displayed.
      */
     public void show(LoopMeAdapter adapter, View view) {
+        Log.d("debug2", "show called");
         if (mViewController != null &&
                 mViewController.getCurrentDisplayMode() == DisplayMode.FULLSCREEN) {
             //
@@ -371,6 +390,7 @@ public class LoopMeBanner extends BaseAd {
                 pause();
             }
         }
+
     }
 
     void playbackFinishedWithError() {
@@ -635,4 +655,13 @@ public class LoopMeBanner extends BaseAd {
         android.view.ViewGroup.LayoutParams params = mBannerView.getLayoutParams();
         return params.height;
     }
+
+    public void rebuildView(LoopMeBannerView bannerView) {
+        mViewController.rebuildView(bannerView);
+    }
+
+    public void setAdVisibilityListener(AdVisibilityListener mAdVisibilityListener) {
+        this.mAdVisibilityListener = mAdVisibilityListener;
+    }
+
 }
