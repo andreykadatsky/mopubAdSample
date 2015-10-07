@@ -10,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ListView;
@@ -354,10 +353,8 @@ public class LoopMeBanner extends BaseAd {
      * @param view    - listview/recyclerview/scrollview in which native video ad is displayed.
      */
     public void show(LoopMeAdapter adapter, View view) {
-        Log.d("debug2", "show called");
         if (mViewController != null &&
                 mViewController.getCurrentDisplayMode() == DisplayMode.FULLSCREEN) {
-            //
             return;
         }
         if (mAdState == AdState.SHOWING) {
