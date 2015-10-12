@@ -64,11 +64,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
             @Override
             public void hidden() {
                 if (!itemViewClean) {
-                    if (mBannerView != null && mBannerViewHolder.getParent() != null) {
-                        ViewGroup listItem = (ViewGroup) mBannerViewHolder.getParent();
-                        listItem.removeView(mBannerViewHolder);
-                        itemViewClean = true;
-                    }
+                    cleanListItemView();
                 }
 
             }
@@ -80,6 +76,14 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 mBanner.setListener(this);
                 mBanner.load();
             }
+        }
+    }
+
+    private void cleanListItemView() {
+        if (mBannerView != null && mBannerViewHolder.getParent() != null) {
+            ViewGroup listItem = (ViewGroup) mBannerViewHolder.getParent();
+            listItem.removeView(mBannerViewHolder);
+            itemViewClean = true;
         }
     }
 
@@ -137,6 +141,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
     @Override
     public void destroy() {
         if (mBanner != null) {
+            cleanListItemView();
             mBanner.dismiss();
             mBanner.destroy();
             mListener.destroy();
