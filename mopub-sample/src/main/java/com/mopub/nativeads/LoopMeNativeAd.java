@@ -18,6 +18,7 @@ import com.loopme.Utils;
 public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBanner.Listener {
 
     static final String TITLE = "LoopmeBanner";
+    static final String BANNER_HOLDER_TAG = "BannerViewHolder";
 
     private LoopMeBannerView mBannerView;
     private FrameLayout mBannerViewHolder;
@@ -100,6 +101,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 mBannerView = new LoopMeBannerView(view.getContext());
 
                 mBannerViewHolder = new FrameLayout(view.getContext());
+                mBannerViewHolder.setTag(BANNER_HOLDER_TAG);
                 mBannerViewHolder.setBackgroundColor(bannerBgColor);
                 mBannerViewHolder.addView(mBannerView);
 
@@ -157,6 +159,10 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
         if (mBanner != null) {
             mBanner.show(adapter, listView);
         }
+    }
+
+    public FrameLayout getBannerViewHolder() {
+        return mBannerViewHolder;
     }
 
     @Override

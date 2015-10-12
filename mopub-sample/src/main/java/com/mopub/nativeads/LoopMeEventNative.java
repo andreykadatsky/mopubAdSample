@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ListView;
 
 import com.loopme.LoopMeAdapter;
@@ -74,18 +76,42 @@ public class LoopMeEventNative extends CustomEventNative {
     public static void onScroll() {
         if (sLoopMeNativeAd != null) {
             sLoopMeNativeAd.onScroll(mLoopMeAdapter, mListView);
+            removeBannerFromConvertView();
         }
     }
 
     public static void onPause() {
         if (sLoopMeNativeAd != null) {
             sLoopMeNativeAd.onPause();
+            removeBannerFromConvertView();
         }
     }
 
     public static void onResume() {
         if (sLoopMeNativeAd != null) {
             sLoopMeNativeAd.onResume(mLoopMeAdapter, mListView);
+            removeBannerFromConvertView();
+        }
+    }
+
+    private static void removeBannerFromConvertView() {
+        MoPubAdAdapter moPubAdAdapter = (MoPubAdAdapter) mListView.getAdapter();
+        int first = mListView.getFirstVisiblePosition();
+        int last = mListView.getLastVisiblePosition();
+        for (int i = first; i <= last; i++) {
+            if (moPubAdAdapter.isAd(i)) {
+                final int childIndex = i - first;
+                View itemView = mListView.getChildAt(childIndex);
+                if (itemView instanceof ViewGroup) {
+                    ViewGroup itemRoot = (ViewGroup) itemView;
+                    View bannerHolder = itemRoot.getChildAt(itemRoot.getChildCount() - 1);
+                    if (LoopMeNativeAd.BANNER_HOLDER_TAG.equals(bannerHolder.getTag())) {
+                        if (!mLoopMeAdapter.isAd(i)) {
+                            itemRoot.removeView(bannerHolder);
+                        }
+                    }
+                }
+            }
         }
     }
 
