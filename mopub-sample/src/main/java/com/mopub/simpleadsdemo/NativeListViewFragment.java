@@ -103,6 +103,8 @@ public class NativeListViewFragment extends Fragment {
         LoopMeEventNative.init(mListView);
         LoopMeEventNative.setBannerBackgroundColor(Color.parseColor("#303030"));
 
+        mAdAdapter.loadAds(mAdConfiguration.getAdUnitId(), mRequestParameters);
+
         return view;
     }
 
@@ -136,7 +138,7 @@ public class NativeListViewFragment extends Fragment {
     @Override
     public void onResume() {
         // MoPub recommends loading knew ads when the user returns to your activity.
-        mAdAdapter.loadAds(mAdConfiguration.getAdUnitId(), mRequestParameters);
+        // mAdAdapter.loadAds(mAdConfiguration.getAdUnitId(), mRequestParameters);
         LoopMeEventNative.onResume();
         super.onResume();
     }
