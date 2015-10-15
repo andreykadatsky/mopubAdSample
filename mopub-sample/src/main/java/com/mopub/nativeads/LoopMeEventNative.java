@@ -3,6 +3,7 @@ package com.mopub.nativeads;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,9 @@ import com.loopme.LoopMeAdapter;
 
 import java.util.Map;
 
+/**
+ * Preconditions: the root element of ads item should be FrameLayout.
+ */
 public class LoopMeEventNative extends CustomEventNative {
 
     private static final String TAG = LoopMeEventNative.class.getSimpleName();
@@ -60,7 +64,10 @@ public class LoopMeEventNative extends CustomEventNative {
                 }
                 if (mListView.getAdapter().getItem(i) instanceof NativeAdData) {
                     NativeAdData adData = (NativeAdData) mListView.getAdapter().getItem(i);
-                    if (adData.getAd().getTitle().equals(LoopMeNativeAd.TITLE)) {
+
+                    // We put in Title field specific string for Loopme banner,
+                    // and can detect is it Loopme ad, using it.
+                    if (LoopMeNativeAd.TITLE.equals(adData.getAd().getTitle())) {
                         return true;
                     }
                 }
@@ -94,7 +101,13 @@ public class LoopMeEventNative extends CustomEventNative {
         }
     }
 
+    /**
+     * Clear ListView item from Loopme banner, to other bridges can reuse it
+     */
     private static void removeBannerFromConvertView() {
+        if (mListView == null || mLoopMeAdapter == null) {
+            return;
+        }
         MoPubAdAdapter moPubAdAdapter = (MoPubAdAdapter) mListView.getAdapter();
         int first = mListView.getFirstVisiblePosition();
         int last = mListView.getLastVisiblePosition();
@@ -123,6 +136,12 @@ public class LoopMeEventNative extends CustomEventNative {
         if (sLoopMeNativeAd == null) {
             String appKey = serverExtras.get(APP_KEY);
             Log.d(TAG, "loadNativeAd, appKey = " + appKey);
+
+            if (TextUtils.isEmpty(appKey)) {
+                customEventNativeListener.onNativeAdFailed(NativeErrorCode.UNSPECIFIED);
+                return;
+            }
+
             OnCompleteListener listener = new OnCompleteListener(customEventNativeListener);
             sLoopMeNativeAd = new LoopMeNativeAd(context, appKey, mBannerBgColor, listener);
         } else {

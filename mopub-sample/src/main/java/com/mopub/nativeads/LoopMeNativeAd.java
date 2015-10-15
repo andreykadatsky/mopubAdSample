@@ -15,10 +15,20 @@ import com.loopme.LoopMeBannerView;
 import com.loopme.LoopMeError;
 import com.loopme.Utils;
 
+/**
+ * Preconditions: the root element of ads item should be FrameLayout.
+ *
+ * LoopMeBannerView added to ListView item on prepare()
+ * and removed when ListView item disappears from the screen.
+ *
+ */
 public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBanner.Listener {
 
     static final String TITLE = "LoopmeBanner";
     static final String BANNER_HOLDER_TAG = "BannerViewHolder";
+
+    public static final int BANNER_WIDTH = 320;
+    public static final int BANNER_HEIGHT = 250;
 
     private LoopMeBannerView mBannerView;
     private FrameLayout mBannerViewHolder;
@@ -34,6 +44,8 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
 
     public LoopMeNativeAd(Context context, String appKey, int bannerBgColor, LoopMeEventNative.OnCompleteListener listener) {
         this.bannerBgColor = bannerBgColor;
+
+        // used for detect LoopMe ad in LoopMeEventNative
         setTitle(TITLE);
         mBanner = LoopMeBanner.getInstance(appKey, context);
         mBanner.setAdVisibilityListener(new LoopMeBanner.AdVisibilityListener() {
@@ -118,10 +130,10 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
                 viewGroup.invalidate();
                 itemViewClean = false;
 
-                int w = Utils.convertDpToPixel(320);
-                int h = Utils.convertDpToPixel(250);
+                int width = Utils.convertDpToPixel(BANNER_WIDTH);
+                int height = Utils.convertDpToPixel(BANNER_HEIGHT);
 
-                mBannerView.setViewSize(w, h);
+                mBannerView.setViewSize(width, height);
 
                 if (view instanceof FrameLayout) {
                     FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) mBannerViewHolder.getLayoutParams();
@@ -144,6 +156,7 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
             cleanListItemView();
             mBanner.dismiss();
             mBanner.destroy();
+            mBanner = null;
             mListener.destroy();
         }
     }
@@ -164,10 +177,6 @@ public class LoopMeNativeAd extends BaseForwardingNativeAd implements LoopMeBann
         if (mBanner != null) {
             mBanner.show(adapter, listView);
         }
-    }
-
-    public FrameLayout getBannerViewHolder() {
-        return mBannerViewHolder;
     }
 
     @Override
